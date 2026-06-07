@@ -6,8 +6,8 @@
 
 | 工具 | 说明 | 链接 |
 |------|------|------|
-| 🌐 **AI 翻译助手** | 中文 ↔ 英文双向翻译 | [打开](https://你的翻译助手链接.streamlit.app) |
-| ✨ **小红书文案生成器** | 输入产品信息，AI 生成种草文案 | [打开](https://你的小红书链接.streamlit.app) |
+| 🌐 **AI 翻译助手** | 中文 ↔ 英文双向翻译 | [打开](https://huivet62pgekb3negae9nw.streamlit.app/) |
+| ✨ **小红书文案生成器** | 输入产品信息，AI 生成种草文案 | [打开](https://3hffuxzfc8kwqpjdjtoizx.streamlit.app/) |
 
 ## 🔑 使用前准备
 
