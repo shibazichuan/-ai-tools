@@ -1,6 +1,6 @@
 # AI 工具箱
 
-两个基于 DeepSeek API 的 AI 小工具，免费在线使用。
+两个基于 DeepSeek API 的 AI 小工具，免费在线使用，无需注册。
 
 ## 🛠️ 工具列表
 
@@ -9,13 +9,9 @@
 | 🌐 **AI 翻译助手** | 中文 ↔ 英文双向翻译 | [打开](https://huivet62pgekb3negae9nw.streamlit.app/) |
 | ✨ **小红书文案生成器** | 输入产品信息，AI 生成种草文案 | [打开](https://3hffuxzfc8kwqpjdjtoizx.streamlit.app/) |
 
-## 🔑 使用前准备
+> 🚀 **打开即用，无需注册，完全免费。** API Key 已在后台配置好，你只管用。
 
-1. 去 [platform.deepseek.com](https://platform.deepseek.com) 注册账号
-2. 获取一个 API Key（新用户送 500 万 tokens 免费额度）
-3. 在工具页面的侧边栏/输入框中填入你的 Key
-
-> ⚠️ **你的 API Key 只保存在浏览器中，不会上传到任何服务器。**
+---
 
 ## 🚀 本地运行
 
@@ -23,18 +19,28 @@
 # 安装依赖
 pip install -r requirements.txt
 
+# 配置 API Key（二选一）
+# 方式一：创建 .streamlit/secrets.toml
+echo 'DEEPSEEK_API_KEY = "你的Key"' > .streamlit/secrets.toml
+# 方式二：直接设置环境变量
+
 # 运行翻译助手
-streamlit run translator_app.py
+streamlit run translator.py
 
 # 运行小红书生成器
-streamlit run xiaohongshu_app.py
+streamlit run xiaohongshu.py
 ```
 
-## 💰 成本
+---
 
-- 工具本身：完全免费
-- DeepSeek API：约 ¥0.002/次翻译，小红书文案约 ¥0.005/篇
-- 新注册用户送 500 万 tokens ≈ 够用几千次
+## 🔑 API 说明
+
+- 工具面向用户**免配置**，Key 通过 Streamlit Secrets 在后台注入
+- 使用的 API：DeepSeek（`api.deepseek.com`），模型 `deepseek-chat`
+- 新用户去 [platform.deepseek.com](https://platform.deepseek.com) 注册送 500 万 tokens
+- 成本极低：翻译约 ¥0.002/次，小红书文案约 ¥0.005/篇
+
+---
 
 ## 📦 部署
 
