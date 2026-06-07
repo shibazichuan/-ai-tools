@@ -2,39 +2,29 @@
 AI 小红书文案生成器 — DeepSeek 版
 ==================================
 输入你的产品，AI 帮你生成小红书风格的种草文案。
-
-运行方法：
-    set DEEPSEEK_API_KEY=你的Key
-    streamlit run 02-xiaohongshu.py
+直接使用，无需注册。
 """
 
 import streamlit as st
 from openai import OpenAI
-import os
+
+API_KEY = st.secrets["DEEPSEEK_API_KEY"]
 
 # 页面设置
 st.set_page_config(
     page_title="小红书文案生成器",
-    page_icon="[XHS]",
+    page_icon="✨",
     layout="wide",
 )
 
-st.title("[XHS] AI 小红书文案生成器")
-st.caption("输入你的产品，AI 帮你写一篇种草文案。DeepSeek 驱动，每次只要几分钱。")
+st.title("✨ AI 小红书文案生成器")
+st.caption("输入你的产品，AI 帮你写一篇种草文案。DeepSeek 驱动，完全免费。")
 
 # ============================================================
-# 侧边栏 — API 配置
+# 侧边栏 — 风格设置
 # ============================================================
 with st.sidebar:
-    st.header("设置")
-
-    api_key = st.text_input(
-        "DeepSeek API Key",
-        type="password",
-        placeholder="sk-...",
-        help="去 platform.deepseek.com 注册获取",
-        value=os.getenv("DEEPSEEK_API_KEY", ""),
-    )
+    st.header("🎨 文案设置")
 
     style = st.selectbox(
         "文案风格",
@@ -59,7 +49,7 @@ with st.sidebar:
         )
 
     st.divider()
-    st.caption("提示：DeepSeek 注册送 500 万 tokens 免费额度")
+    st.caption("🚀 DeepSeek 驱动 · 完全免费")
 
 # ============================================================
 # 主区域
@@ -67,7 +57,7 @@ with st.sidebar:
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.subheader("[Input] 输入产品信息")
+    st.subheader("📝 输入产品信息")
 
     product_name = st.text_input(
         "产品名称",
@@ -85,19 +75,17 @@ with col1:
         placeholder="比如：学生党、上班族、宝妈...",
     )
 
-    generate_btn = st.button("[Go] 生成文案", type="primary", use_container_width=True)
+    generate_btn = st.button("🚀 生成文案", type="primary", use_container_width=True)
 
 with col2:
-    st.subheader("[Output] 生成的文案")
+    st.subheader("✨ 生成的文案")
     result_placeholder = st.empty()
 
 # ============================================================
 # 生成逻辑
 # ============================================================
 if generate_btn:
-    if not api_key:
-        st.error("请先在左侧边栏填写 DeepSeek API Key")
-    elif not product_name:
+    if not product_name:
         st.error("请至少输入产品名称")
     else:
         length_map = {
@@ -125,7 +113,7 @@ if generate_btn:
         with st.spinner("AI 正在创作中..."):
             try:
                 client = OpenAI(
-                    api_key=api_key,
+                    api_key=API_KEY,
                     base_url="https://api.deepseek.com",
                 )
 
@@ -145,17 +133,14 @@ if generate_btn:
                 result = response.choices[0].message.content
 
                 with col2:
-                    st.success("[OK] 生成完成！")
+                    st.success("✅ 生成完成！")
                     st.markdown(result)
 
                     if response.usage:
-                        # DeepSeek 约 2 元/百万 tokens
-                        cost = response.usage.total_tokens / 1_000_000 * 2
-                        st.caption(f"[Stats] 消耗约 {response.usage.total_tokens} tokens | 约 {cost:.4f} 元")
+                        st.caption(f"消耗约 {response.usage.total_tokens} tokens")
 
             except Exception as e:
                 st.error(f"生成失败：{str(e)}")
-                st.info("常见原因：1) API Key 填错了 2) 网络不通 3) 账号没充值")
 
 st.divider()
-st.caption("技术栈：Python + Streamlit + DeepSeek API | 数据不会存储，刷新即消失")
+st.caption("🚀 完全免费 · 直接使用 · 无需注册")
