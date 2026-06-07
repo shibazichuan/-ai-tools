@@ -12,9 +12,18 @@ API_KEY = st.secrets["DEEPSEEK_API_KEY"]
 
 # 页面设置
 st.set_page_config(
-    page_title="小红书文案生成器",
+    page_title="小红书文案生成器 - AI种草文案 | 免费在线写作工具",
     page_icon="✨",
     layout="wide",
+)
+
+# SEO 元标签
+st.markdown(
+    """
+    <meta name="description" content="免费 AI 小红书文案生成器，输入产品信息即可生成种草文案。支持5种风格、3种篇幅，DeepSeek 驱动，不用注册直接使用。">
+    <meta name="keywords" content="小红书文案,种草文案,AI写文案,小红书生成器,DeepSeek文案,文案生成器,免费文案工具">
+    """,
+    unsafe_allow_html=True,
 )
 
 st.title("✨ AI 小红书文案生成器")
@@ -143,4 +152,4 @@ if generate_btn:
                 st.error(f"生成失败：{str(e)}")
 
 st.divider()
-st.caption("🚀 完全免费 · 直接使用 · 无需注册")
+st.caption("🚀 完全免费 · 直接使用 · 无需注册 · AI 种草文案生成器 · 小红书写文助手")

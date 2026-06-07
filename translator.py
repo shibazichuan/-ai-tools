@@ -14,9 +14,18 @@ API_KEY = st.secrets["DEEPSEEK_API_KEY"]
 # 页面设置
 # ============================================================
 st.set_page_config(
-    page_title="AI 翻译助手",
+    page_title="AI 翻译助手 - 中英双向翻译 | 免费在线翻译工具",
     page_icon="🌐",
     layout="centered",
+)
+
+# SEO 元标签
+st.markdown(
+    """
+    <meta name="description" content="免费在线 AI 翻译助手，中文英文双向翻译，DeepSeek 驱动。支持多行文本，翻译自然流畅，不用注册直接使用。">
+    <meta name="keywords" content="AI翻译,中英翻译,在线翻译,免费翻译,DeepSeek翻译,英语翻译,中文翻译英文">
+    """,
+    unsafe_allow_html=True,
 )
 
 st.title("🌐 AI 翻译助手")
@@ -94,4 +103,4 @@ if translate_btn:
                 st.error(f"翻译失败：{str(e)}")
 
 st.divider()
-st.caption("🚀 完全免费 · 直接使用 · 无需注册")
+st.caption("🚀 完全免费 · 直接使用 · 无需注册 · AI 在线翻译工具 · 中英互译")
