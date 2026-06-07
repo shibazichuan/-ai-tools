@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shibazichuan — 个人主页</title>
+    <meta name="description" content="shibazichuan 的个人主页，分享自制的 AI 小工具。DeepSeek 驱动，免费，无需注册。">
+    <style>
+        /* ============================================================
+           重置 & 基础
+        ============================================================ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text: #2d3748;
+            --text-light: #718096;
+            --bg: #f7f8fc;
+            --card-bg: #ffffff;
+            --radius: 16px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.06);
+            --shadow-hover: 0 12px 40px rgba(102,126,234,0.15);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ============================================================
+           导航栏
+        ============================================================ */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        .navbar .logo {
+            font-size: 1.2rem; font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .navbar .nav-links { display: flex; gap: 28px; list-style: none; }
+        .navbar .nav-links a {
+            text-decoration: none; color: var(--text-light); font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .navbar .nav-links a:hover { color: #667eea; }
+
+        /* ============================================================
+           Hero
+        ============================================================ */
+        .hero {
+            padding: 140px 24px 80px;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .avatar {
+            width: 96px; height: 96px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 28px;
+            font-size: 2.4rem; font-weight: 800; color: #fff;
+            box-shadow: 0 8px 32px rgba(102,126,234,0.35);
+        }
+        .hero h1 {
+            font-size: 2.4rem; font-weight: 800; letter-spacing: -0.01em;
+            margin-bottom: 12px; color: var(--text);
+        }
+        .hero .tagline {
+            font-size: 1.15rem; color: var(--text-light);
+            margin-bottom: 36px; line-height: 1.8;
+        }
+        .hero .cta-group { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 13px 32px;
+            border-radius: 100px; font-size: 0.95rem; font-weight: 600;
+            text-decoration: none; transition: all 0.3s; cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: var(--gradient); color: #fff;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.35);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102,126,234,0.45);
+        }
+        .btn-outline {
+            border: 2px solid #e2e8f0; color: var(--text); background: #fff;
+        }
+        .btn-outline:hover { border-color: #667eea; color: #667eea; transform: translateY(-2px); }
+
+        /* ============================================================
+           通用 section
+        ============================================================ */
+        .section {
+            max-width: 960px; margin: 0 auto; padding: 80px 24px;
+        }
+        .section-header { text-align: center; margin-bottom: 56px; }
+        .section-header h2 {
+            font-size: 1.8rem; font-weight: 700; margin-bottom: 8px;
+        }
+        .section-header .line {
+            width: 48px; height: 3px;
+            background: var(--gradient);
+            margin: 12px auto 0; border-radius: 2px;
+        }
+
+        /* ============================================================
+           关于我
+        ============================================================ */
+        .about-card {
+            background: var(--card-bg); border-radius: var(--radius);
+            padding: 40px; max-width: 700px; margin: 0 auto;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .about-card p {
+            color: var(--text-light); font-size: 1rem; line-height: 1.9;
+        }
+        .tags {
+            display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px;
+        }
+        .tag {
+            background: linear-gradient(135deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.08) 100%);
+            color: #667eea;
+            padding: 6px 18px; border-radius: 100px;
+            font-size: 0.85rem; font-weight: 500;
+        }
+
+        /* ============================================================
+           AI 工具箱
+        ============================================================ */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px;
+        }
+        .tool-card {
+            background: var(--card-bg); border-radius: var(--radius);
+            padding: 36px 30px;
+            box-shadow: var(--shadow);
+            transition: all 0.35s ease;
+            text-decoration: none; color: inherit;
+            display: block;
+            border: 1px solid rgba(0,0,0,0.04);
+            position: relative; overflow: hidden;
+        }
+        .tool-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: var(--gradient);
+            transform: scaleX(0); transform-origin: center;
+            transition: transform 0.35s ease;
+        }
+        .tool-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-4px); }
+        .tool-card:hover::before { transform: scaleX(1); }
+        .tool-card .icon { font-size: 2.6rem; margin-bottom: 18px; display: block; }
+        .tool-card h3 { font-size: 1.25rem; margin-bottom: 6px; }
+        .tool-card .desc { color: var(--text-light); font-size: 0.9rem; margin-bottom: 14px; }
+        .tool-card .features {
+            list-style: none;
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;
+        }
+        .tool-card .features li {
+            background: var(--bg); padding: 4px 14px; border-radius: 100px;
+            font-size: 0.8rem; color: var(--text-light);
+        }
+        .tool-card .try-btn {
+            display: inline-block;
+            background: var(--gradient); color: #fff;
+            padding: 9px 24px; border-radius: 100px;
+            font-size: 0.88rem; font-weight: 600;
+            transition: transform 0.3s;
+        }
+        .tool-card:hover .try-btn { transform: scale(1.05); }
+
+        /* ============================================================
+           联系方式
+        ============================================================ */
+        .contact-grid {
+            display: flex; justify-content: center; gap: 28px; flex-wrap: wrap;
+        }
+        .contact-item {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--card-bg); padding: 18px 28px;
+            border-radius: 12px; text-decoration: none; color: var(--text);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .contact-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            color: #667eea;
+        }
+        .contact-item .c-icon { font-size: 1.4rem; }
+
+        /* ============================================================
+           页脚
+        ============================================================ */
+        .footer {
+            text-align: center; padding: 48px 24px;
+            color: var(--text-light); font-size: 0.85rem;
+        }
+        .footer .divider {
+            width: 48px; height: 3px;
+            background: var(--gradient);
+            margin: 0 auto 24px; border-radius: 2px;
+        }
+
+        /* ============================================================
+           响应式
+        ============================================================ */
+        @media (max-width: 768px) {
+            .hero { padding: 120px 20px 60px; }
+            .hero h1 { font-size: 1.8rem; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .navbar .nav-links { gap: 18px; }
+            .section { padding: 56px 20px; }
+            .section-header h2 { font-size: 1.5rem; }
+            .about-card { padding: 28px 24px; }
+            .contact-grid { flex-direction: column; align-items: center; }
+        }
+
+        /* ============================================================
+           滚动动画
+        ============================================================ */
+        .fade-in {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">shibazichuan</div>
+        <ul class="nav-links">
+            <li><a href="#about">关于</a></li>
+            <li><a href="#tools">AI工具</a></li>
+            <li><a href="#contact">联系</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="avatar">S</div>
+        <h1>shibazichuan</h1>
+        <p class="tagline">
+            👋 你好，欢迎来到我的个人主页。<br>
+            我喜欢捣鼓实用的小工具，希望能帮到你。
+        </p>
+        <div class="cta-group">
+            <a href="#tools" class="btn btn-primary">🛠️ 看看我的工具</a>
+            <a href="https://github.com/shibazichuan" class="btn btn-outline" target="_blank" rel="noopener">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section class="section" id="about">
+        <div class="section-header">
+            <h2>👤 关于我</h2>
+            <div class="line"></div>
+        </div>
+        <div class="about-card fade-in">
+            <p>
+                一个喜欢折腾的开发者，相信好工具应该简单直接——<strong>打开就用，不用注册，不用看广告</strong>。
+            </p>
+            <p style="margin-top:12px;">
+                业余时间学 AI 和 Python，做了几个实用的小工具放在网上。看到有人真的在用，就是最大的动力 ✨
+            </p>
+            <div class="tags">
+                <span class="tag">Python</span>
+                <span class="tag">Streamlit</span>
+                <span class="tag">AI / LLM</span>
+                <span class="tag">DeepSeek</span>
+                <span class="tag">全干工程师</span>
+                <span class="tag">工具控</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI 工具箱 -->
+    <section class="section" id="tools">
+        <div class="section-header">
+            <h2>🛠️ AI 工具箱</h2>
+            <div class="line"></div>
+            <p style="color:var(--text-light);margin-top:10px;">DeepSeek 驱动 · 完全免费 · 无需注册</p>
+        </div>
+        <div class="tools-grid">
+            <!-- 翻译助手 -->
+            <a href="https://huivet62pgekb3negae9nw.streamlit.app/" class="tool-card fade-in" target="_blank" rel="noopener">
+                <span class="icon">🌐</span>
+                <h3>AI 翻译助手</h3>
+                <p class="desc">中文 ↔ 英文双向翻译，地道自然，不是机翻味。</p>
+                <ul class="features">
+                    <li>中 → 英</li>
+                    <li>英 → 中</li>
+                    <li>多行文本</li>
+                    <li>地道表达</li>
+                </ul>
+                <span class="try-btn">立即试用 →</span>
+            </a>
+
+            <!-- 小红书 -->
+            <a href="https://3hffuxzfc8kwqpjdjtoizx.streamlit.app/" class="tool-card fade-in" target="_blank" rel="noopener">
+                <span class="icon">✨</span>
+                <h3>小红书文案生成器</h3>
+                <p class="desc">输入产品信息，AI 帮你写一篇吸睛的种草文案。</p>
+                <ul class="features">
+                    <li>5种风格</li>
+                    <li>3种篇幅</li>
+                    <li>可调创意度</li>
+                    <li>自带话题标签</li>
+                </ul>
+                <span class="try-btn">立即试用 →</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- 联系方式 -->
+    <section class="section" id="contact">
+        <div class="section-header">
+            <h2>📬 联系我</h2>
+            <div class="line"></div>
+            <p style="color:var(--text-light);margin-top:10px;">欢迎交流，交个朋友</p>
+        </div>
+        <div class="contact-grid fade-in">
+            <a href="https://github.com/shibazichuan" class="contact-item" target="_blank" rel="noopener">
+                <span class="c-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </span>
+                GitHub
+            </a>
+            <a href="mailto:shibazichuan@example.com" class="contact-item">
+                <span class="c-icon">📧</span>
+                邮箱
+            </a>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="divider"></div>
+        <p>shibazichuan · DeepSeek 驱动 · 完全免费 · 无需注册</p>
+        <p style="margin-top:12px;font-size:0.8rem;color:#a0aec0;">
+            © 2025 shibazichuan
+        </p>
+    </footer>
+
+    <!-- 滚动动画 -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+
+</body>
+</html>
