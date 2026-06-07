@@ -227,6 +227,35 @@
         }
 
         /* ============================================================
+           赞赏
+        ============================================================ */
+        .donate-card {
+            max-width: 460px; margin: 0 auto;
+            background: var(--card-bg); border-radius: var(--radius);
+            padding: 36px 32px; text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .donate-card .d-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+        .donate-card .d-desc { color: var(--text-light); font-size: 0.9rem; margin-bottom: 24px; }
+        .donate-qr {
+            display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+        }
+        .donate-qr .qr-item {
+            background: var(--bg); border-radius: 12px; padding: 16px;
+            width: 170px;
+        }
+        .qr-item .qr-placeholder {
+            width: 120px; height: 120px;
+            margin: 0 auto 10px;
+            background: #fff; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px dashed #e2e8f0;
+            color: #cbd5e0; font-size: 0.75rem;
+        }
+        .qr-item .qr-label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+
+        /* ============================================================
            响应式
         ============================================================ */
         @media (max-width: 768px) {
@@ -259,6 +288,7 @@
             <li><a href="#about">关于</a></li>
             <li><a href="#tools">AI工具</a></li>
             <li><a href="#contact">联系</a></li>
+            <li><a href="#donate">☕ 赞赏</a></li>
         </ul>
     </nav>
 
@@ -359,6 +389,32 @@
                 <span class="c-icon">📧</span>
                 邮箱
             </a>
+        </div>
+    </section>
+
+    <!-- 赞赏 -->
+    <section class="section" id="donate">
+        <div class="section-header">
+            <h2>☕ 请作者喝杯咖啡</h2>
+            <div class="line"></div>
+            <p style="color:var(--text-light);margin-top:10px;">如果我的工具帮到了你，欢迎赞赏支持</p>
+        </div>
+        <div class="donate-card fade-in">
+            <div class="donate-qr">
+                <div class="qr-item">
+                    <div class="qr-placeholder">
+                        <span>微信<br>收款码<br>（替换为你的）</span>
+                    </div>
+                    <div class="qr-label">💚 微信赞赏</div>
+                </div>
+                <div class="qr-item">
+                    <div class="qr-placeholder">
+                        <span>支付宝<br>收款码<br>（替换为你的）</span>
+                    </div>
+                    <div class="qr-label">💙 支付宝赞赏</div>
+                </div>
+            </div>
+            <p style="margin-top:18px;font-size:0.82rem;color:#a0aec0;">打开微信/支付宝 → 扫一扫 → 任意金额</p>
         </div>
     </section>
 
