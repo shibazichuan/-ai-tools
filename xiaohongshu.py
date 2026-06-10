@@ -136,7 +136,7 @@ with st.sidebar:
     # 另一个工具链接
     st.markdown(
         f'<a href="{TRANSLATOR_URL}" '
-        'style="display:block;padding:6px 12px;color:#1a1a2e;'
+        'style="display:block;padding:6px 12px;color:inherit;'
         'text-decoration:none;border-radius:8px;font-size:0.85rem;" '
         'target="_blank" rel="noopener">🌐 AI 翻译助手</a>',
         unsafe_allow_html=True,

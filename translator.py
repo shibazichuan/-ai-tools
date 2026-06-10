@@ -95,7 +95,7 @@ with st.sidebar:
     # 另一个工具链接
     st.markdown(
         '<a href="https://3hffuxzfc8kwqpjdjtoizx.streamlit.app/" '
-        'style="display:block;padding:6px 12px;color:#1a1a2e;'
+        'style="display:block;padding:6px 12px;color:inherit;'
         'text-decoration:none;border-radius:8px;font-size:0.85rem;" '
         'target="_blank" rel="noopener">✨ 小红书文案生成器</a>',
         unsafe_allow_html=True,
