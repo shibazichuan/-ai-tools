@@ -6,10 +6,20 @@ AI 小红书文案生成器 — DeepSeek 版
 """
 
 import streamlit as st
-from openai import OpenAI
+from openai import (
+    OpenAI,
+    AuthenticationError,
+    RateLimitError,
+    APIConnectionError,
+    APITimeoutError,
+)
 import random
 
 API_KEY = st.secrets["DEEPSEEK_API_KEY"]
+
+GITHUB_ISSUES = "https://github.com/shibazichuan/-ai-tools/issues"
+HOME_URL = "https://zhixumentu.com"
+TRANSLATOR_URL = "https://huivet62pgekb3negae9nw.streamlit.app/"
 
 # 有趣的 loading 文案
 LOADING_MSGS = [
@@ -41,6 +51,30 @@ st.markdown(
 
 st.title("✨ AI 小红书文案生成器")
 st.caption("输入你的产品，AI 帮你写一篇种草文案。DeepSeek 驱动，完全免费。")
+
+# 品牌标签
+col_t1, col_t2, col_t3, col_t4 = st.columns([0.7, 0.7, 1, 4])
+with col_t1:
+    st.markdown(
+        '<span style="background:linear-gradient(135deg,#22c55e,#16a34a);'
+        'color:#fff;padding:3px 14px;border-radius:100px;font-size:0.78rem;'
+        'font-weight:700;white-space:nowrap;">永久免费</span>',
+        unsafe_allow_html=True,
+    )
+with col_t2:
+    st.markdown(
+        '<span style="background:linear-gradient(135deg,#f59e0b,#d97706);'
+        'color:#fff;padding:3px 14px;border-radius:100px;font-size:0.78rem;'
+        'font-weight:700;white-space:nowrap;">无需注册</span>',
+        unsafe_allow_html=True,
+    )
+with col_t3:
+    st.markdown(
+        '<span style="background:linear-gradient(135deg,#667eea,#764ba2);'
+        'color:#fff;padding:3px 14px;border-radius:100px;font-size:0.78rem;'
+        'font-weight:700;white-space:nowrap;">DeepSeek 驱动</span>',
+        unsafe_allow_html=True,
+    )
 
 # ============================================================
 # 初始化 session state
@@ -86,6 +120,41 @@ with st.sidebar:
 
     st.divider()
     st.caption("🚀 DeepSeek 驱动 · 完全免费")
+
+    st.divider()
+    st.markdown("### 🚀 AI 工具箱")
+
+    # 当前工具高亮
+    st.markdown(
+        '<div style="background:linear-gradient(135deg,#667eea,#764ba2);'
+        'color:#fff;padding:6px 12px;border-radius:8px;font-size:0.85rem;'
+        'font-weight:600;margin-bottom:4px;">✨ 小红书文案生成器'
+        '<span style="font-size:0.7rem;opacity:0.85;"> · 当前</span></div>',
+        unsafe_allow_html=True,
+    )
+
+    # 另一个工具链接
+    st.markdown(
+        f'<a href="{TRANSLATOR_URL}" '
+        'style="display:block;padding:6px 12px;color:#1a1a2e;'
+        'text-decoration:none;border-radius:8px;font-size:0.85rem;" '
+        'target="_blank" rel="noopener">🌐 AI 翻译助手</a>',
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # 主页链接
+    st.markdown(
+        f'<a href="{HOME_URL}" '
+        'style="display:block;padding:6px 12px;color:#667eea;'
+        'text-decoration:none;border-radius:8px;font-size:0.85rem;'
+        'font-weight:500;">🏠 回到工具箱首页</a>',
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+    st.caption("by shibazichuan\n完全免费 · 无需注册")
 
 # ============================================================
 # 主区域
@@ -180,6 +249,7 @@ if generate_btn:
                     ],
                     temperature=temperature,
                     max_tokens=max_tokens,
+                    timeout=30,
                 )
 
                 result = response.choices[0].message.content
@@ -213,7 +283,7 @@ if generate_btn:
 
                         if len(versions) == 3:
                             tabs = st.tabs(
-                                ["🔢 版本一", "🔢 版本二", "🔢 版本三"]
+                                ["💚 实用体验版", "💰 性价比版", "✨ 生活方式版"]
                             )
                             for tab, version in zip(tabs, versions):
                                 with tab:
@@ -234,8 +304,17 @@ if generate_btn:
                         with st.expander("📋 复制文案"):
                             st.code(result, language=None)
 
-            except Exception as e:
-                st.error(f"生成失败：{str(e)}")
+            except AuthenticationError:
+                st.error("🔑 API 密钥配置有误，请联系站长修复。")
+            except RateLimitError:
+                st.error("⏳ 当前使用人数较多，请稍后再试。")
+            except (APIConnectionError, APITimeoutError):
+                st.error("🌐 网络连接失败，请检查网络后重试。")
+            except Exception:
+                st.error(
+                    "⚠️ 服务暂时不可用，请稍后重试。"
+                    f"如持续出现请通过 [GitHub Issues]({GITHUB_ISSUES}) 反馈。"
+                )
 
 # ============================================================
 # 历史记录
@@ -263,5 +342,7 @@ if st.session_state.xhs_history:
 
 st.divider()
 st.caption(
-    "🚀 完全免费 · 直接使用 · 无需注册 · AI 种草文案生成器 · 小红书写文助手"
+    f"🚀 by **shibazichuan** · [🏠 工具箱首页]({HOME_URL}) · "
+    "完全免费 · 无需注册"
 )
+st.caption("🔒 我们不保存您的任何输入内容")
