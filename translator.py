@@ -6,10 +6,19 @@ AI 翻译助手 — Streamlit 网页版
 """
 
 import streamlit as st
-from openai import OpenAI
+from openai import (
+    OpenAI,
+    AuthenticationError,
+    RateLimitError,
+    APIConnectionError,
+    APITimeoutError,
+)
 import random
 
 API_KEY = st.secrets["DEEPSEEK_API_KEY"]
+
+GITHUB_ISSUES = "https://github.com/shibazichuan/-ai-tools/issues"
+HOME_URL = "https://zhixumentu.com"
 
 # 有趣的 loading 文案
 LOADING_MSGS = [
@@ -43,6 +52,68 @@ st.markdown(
 
 st.title("🌐 AI 翻译助手")
 st.caption("中文 ↔ 英文翻译 · 直接使用，完全免费")
+
+# 品牌标签
+col_t1, col_t2, col_t3, col_t4 = st.columns([0.7, 0.7, 1, 4])
+with col_t1:
+    st.markdown(
+        '<span style="background:linear-gradient(135deg,#22c55e,#16a34a);'
+        'color:#fff;padding:3px 14px;border-radius:100px;font-size:0.78rem;'
+        'font-weight:700;white-space:nowrap;">永久免费</span>',
+        unsafe_allow_html=True,
+    )
+with col_t2:
+    st.markdown(
+        '<span style="background:linear-gradient(135deg,#f59e0b,#d97706);'
+        'color:#fff;padding:3px 14px;border-radius:100px;font-size:0.78rem;'
+        'font-weight:700;white-space:nowrap;">无需注册</span>',
+        unsafe_allow_html=True,
+    )
+with col_t3:
+    st.markdown(
+        '<span style="background:linear-gradient(135deg,#667eea,#764ba2);'
+        'color:#fff;padding:3px 14px;border-radius:100px;font-size:0.78rem;'
+        'font-weight:700;white-space:nowrap;">DeepSeek 驱动</span>',
+        unsafe_allow_html=True,
+    )
+
+# ============================================================
+# 侧边栏 — 工具箱导航
+# ============================================================
+with st.sidebar:
+    st.markdown("### 🚀 AI 工具箱")
+
+    # 当前工具高亮
+    st.markdown(
+        '<div style="background:linear-gradient(135deg,#667eea,#764ba2);'
+        'color:#fff;padding:6px 12px;border-radius:8px;font-size:0.85rem;'
+        'font-weight:600;margin-bottom:4px;">🌐 翻译助手'
+        '<span style="font-size:0.7rem;opacity:0.85;"> · 当前</span></div>',
+        unsafe_allow_html=True,
+    )
+
+    # 另一个工具链接
+    st.markdown(
+        '<a href="https://3hffuxzfc8kwqpjdjtoizx.streamlit.app/" '
+        'style="display:block;padding:6px 12px;color:#1a1a2e;'
+        'text-decoration:none;border-radius:8px;font-size:0.85rem;" '
+        'target="_blank" rel="noopener">✨ 小红书文案生成器</a>',
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # 主页链接
+    st.markdown(
+        f'<a href="{HOME_URL}" '
+        'style="display:block;padding:6px 12px;color:#667eea;'
+        'text-decoration:none;border-radius:8px;font-size:0.85rem;'
+        'font-weight:500;">🏠 回到工具箱首页</a>',
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+    st.caption("by shibazichuan\n完全免费 · 无需注册")
 
 # ============================================================
 # 初始化 session state
@@ -124,6 +195,7 @@ if translate_btn:
                         {"role": "user", "content": text},
                     ],
                     temperature=0.3,
+                    timeout=30,
                 )
 
                 result = response.choices[0].message.content
@@ -158,8 +230,17 @@ if translate_btn:
 
                 st.caption(f"消耗 {tokens} tokens")
 
-            except Exception as e:
-                st.error(f"翻译失败：{str(e)}")
+            except AuthenticationError:
+                st.error("🔑 API 密钥配置有误，请联系站长修复。")
+            except RateLimitError:
+                st.error("⏳ 当前使用人数较多，请稍后再试。")
+            except (APIConnectionError, APITimeoutError):
+                st.error("🌐 网络连接失败，请检查网络后重试。")
+            except Exception:
+                st.error(
+                    "⚠️ 服务暂时不可用，请稍后重试。"
+                    f"如持续出现请通过 [GitHub Issues]({GITHUB_ISSUES}) 反馈。"
+                )
 
 # ============================================================
 # 历史记录
@@ -188,5 +269,7 @@ if st.session_state.translator_history:
 
 st.divider()
 st.caption(
-    "🚀 完全免费 · 直接使用 · 无需注册 · AI 在线翻译工具 · 中英互译"
+    f"🚀 by **shibazichuan** · [🏠 工具箱首页]({HOME_URL}) · "
+    "完全免费 · 无需注册"
 )
+st.caption("🔒 我们不保存您的任何输入内容")
