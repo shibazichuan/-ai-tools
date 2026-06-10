@@ -1,36 +1,64 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>shibazichuan — 个人主页</title>
-    <meta name="description" content="shibazichuan 的个人主页，分享自制的 AI 小工具。DeepSeek 驱动，免费，无需注册。">
+    <title>shibazichuan — AI 工具箱 | 免费在线工具</title>
+    <meta name="description" content="shibazichuan 的个人主页，分享自制的 AI 小工具。DeepSeek 驱动，免费，无需注册。翻译助手、小红书文案生成器。">
     <meta name="baidu-site-verification" content="codeva-CavCl4efOq" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>">
+
     <style>
         /* ============================================================
-           重置 & 基础
+           变量
         ============================================================ */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         :root {
+            --primary: #667eea;
+            --primary2: #764ba2;
             --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --text: #2d3748;
-            --text-light: #718096;
-            --bg: #f7f8fc;
-            --card-bg: #ffffff;
-            --radius: 16px;
+            --bg: #f8f9fc;
+            --bg-secondary: #eef0f6;
+            --card: #ffffff;
+            --card-border: rgba(0,0,0,0.05);
+            --text: #1a1a2e;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
             --shadow: 0 4px 24px rgba(0,0,0,0.06);
-            --shadow-hover: 0 12px 40px rgba(102,126,234,0.15);
+            --shadow-lg: 0 12px 48px rgba(0,0,0,0.08);
+            --shadow-glow: 0 8px 32px rgba(102,126,234,0.3);
+            --nav-bg: rgba(248,249,252,0.85);
+            --hero-gradient: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fef2f2 100%);
+            --radius: 16px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        html { scroll-behavior: smooth; }
+        [data-theme="dark"] {
+            --bg: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --card: #1a1a2e;
+            --card-border: rgba(255,255,255,0.06);
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+            --shadow: 0 4px 24px rgba(0,0,0,0.25);
+            --shadow-lg: 0 12px 48px rgba(0,0,0,0.3);
+            --shadow-glow: 0 8px 32px rgba(102,126,234,0.2);
+            --nav-bg: rgba(15,15,26,0.85);
+            --hero-gradient: linear-gradient(135deg, #13132b 0%, #1a1030 50%, #1f1525 100%);
+        }
 
+        /* ============================================================
+           基础
+        ============================================================ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            color: var(--text);
-            background: var(--bg);
-            line-height: 1.7;
-            -webkit-font-smoothing: antialiased;
+            color: var(--text); background: var(--bg);
+            line-height: 1.7; -webkit-font-smoothing: antialiased;
+            transition: background var(--transition), color var(--transition);
         }
 
         /* ============================================================
@@ -38,241 +66,306 @@
         ============================================================ */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 64px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 0 24px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: box-shadow var(--transition), background var(--transition);
         }
-        .navbar .logo {
-            font-size: 1.2rem; font-weight: 700;
+        .navbar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .nav-left .logo {
+            font-size: 1.15rem; font-weight: 700;
             background: var(--gradient);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .navbar .nav-links { display: flex; gap: 28px; list-style: none; }
-        .navbar .nav-links a {
-            text-decoration: none; color: var(--text-light); font-size: 0.95rem;
-            transition: color 0.2s;
+        .nav-right { display: flex; align-items: center; gap: 24px; }
+        .nav-links { display: flex; gap: 24px; list-style: none; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-secondary); font-size: 0.9rem;
+            transition: color 0.2s; font-weight: 500;
         }
-        .navbar .nav-links a:hover { color: #667eea; }
+        .nav-links a:hover { color: var(--primary); }
+
+        .theme-toggle {
+            background: var(--bg-secondary); border: 1px solid var(--card-border);
+            border-radius: 100px; width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1.1rem;
+            transition: all var(--transition);
+        }
+        .theme-toggle:hover { border-color: var(--primary); transform: scale(1.05); }
 
         /* ============================================================
            Hero
         ============================================================ */
         .hero {
-            padding: 140px 24px 80px;
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto;
+            position: relative; overflow: hidden;
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            text-align: center; padding: 120px 24px 80px;
+            background: var(--hero-gradient);
+            transition: background var(--transition);
         }
-        .avatar {
-            width: 96px; height: 96px;
-            border-radius: 50%;
-            background: var(--gradient);
+        /* 动态渐变 blob */
+        .hero-blob {
+            position: absolute; width: 500px; height: 500px;
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .hero-blob.blob-1 {
+            background: var(--primary);
+            top: -10%; right: -8%;
+            animation: blobMorph 12s ease-in-out infinite, blobFloat 8s ease-in-out infinite;
+        }
+        .hero-blob.blob-2 {
+            background: var(--primary2);
+            bottom: -12%; left: -6%;
+            width: 400px; height: 400px;
+            animation: blobMorph 10s ease-in-out infinite reverse, blobFloat 7s ease-in-out infinite reverse;
+        }
+        @keyframes blobMorph {
+            0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            25% { border-radius: 35% 65% 45% 55% / 50% 45% 55% 50%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            75% { border-radius: 55% 45% 50% 50% / 65% 35% 55% 45%; }
+        }
+        @keyframes blobFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 15px) scale(0.95); }
+        }
+
+        .hero-content { position: relative; z-index: 1; max-width: 640px; }
+        .hero-content { animation: fadeInUp 0.8s ease-out; }
+
+        /* emoji 头像 */
+        .avatar-wrap {
+            width: 100px; height: 100px; margin: 0 auto 28px;
+            border-radius: 50%; position: relative;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 28px;
-            font-size: 2.4rem; font-weight: 800; color: #fff;
-            box-shadow: 0 8px 32px rgba(102,126,234,0.35);
         }
-        .hero h1 {
-            font-size: 2.4rem; font-weight: 800; letter-spacing: -0.01em;
-            margin-bottom: 12px; color: var(--text);
+        .avatar-inner {
+            width: 90px; height: 90px; border-radius: 50%;
+            background: var(--card);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.8rem;
+            box-shadow: var(--shadow-lg);
+            position: relative; z-index: 1;
+            transition: transform 0.3s;
         }
-        .hero .tagline {
-            font-size: 1.15rem; color: var(--text-light);
-            margin-bottom: 36px; line-height: 1.8;
+        .avatar-wrap:hover .avatar-inner { transform: scale(1.08) rotate(-5deg); }
+        .avatar-glow {
+            position: absolute; inset: -4px; border-radius: 50%;
+            background: var(--gradient);
+            animation: glowSpin 3s linear infinite;
         }
-        .hero .cta-group { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+        @keyframes glowSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .hero .hero-sub {
+            font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 8px;
+        }
+        .hero .hero-desc {
+            font-size: 0.95rem; color: var(--text-muted); margin-bottom: 36px; line-height: 1.8;
+        }
+        .cta-group { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
         .btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 13px 32px;
-            border-radius: 100px; font-size: 0.95rem; font-weight: 600;
-            text-decoration: none; transition: all 0.3s; cursor: pointer;
-            border: none;
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 13px 30px; border-radius: 100px;
+            font-size: 0.93rem; font-weight: 600;
+            text-decoration: none; transition: all var(--transition); cursor: pointer;
+            border: none; white-space: nowrap;
         }
         .btn-primary {
             background: var(--gradient); color: #fff;
-            box-shadow: 0 4px 20px rgba(102,126,234,0.35);
+            box-shadow: var(--shadow-glow);
         }
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(102,126,234,0.45);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(102,126,234,0.4);
         }
         .btn-outline {
-            border: 2px solid #e2e8f0; color: var(--text); background: #fff;
+            border: 2px solid var(--card-border); color: var(--text); background: var(--card);
         }
-        .btn-outline:hover { border-color: #667eea; color: #667eea; transform: translateY(-2px); }
+        .btn-outline:hover {
+            border-color: var(--primary); color: var(--primary);
+            transform: translateY(-3px);
+        }
 
         /* ============================================================
            通用 section
         ============================================================ */
-        .section {
-            max-width: 960px; margin: 0 auto; padding: 80px 24px;
-        }
+        .section { max-width: 920px; margin: 0 auto; padding: 80px 24px; }
         .section-header { text-align: center; margin-bottom: 56px; }
-        .section-header h2 {
-            font-size: 1.8rem; font-weight: 700; margin-bottom: 8px;
-        }
+        .section-header .section-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+        .section-header h2 { font-size: 1.7rem; font-weight: 700; margin-bottom: 8px; }
+        .section-header p { color: var(--text-secondary); }
         .section-header .line {
             width: 48px; height: 3px;
             background: var(--gradient);
-            margin: 12px auto 0; border-radius: 2px;
+            margin: 14px auto 0; border-radius: 2px;
         }
 
         /* ============================================================
            关于我
         ============================================================ */
         .about-card {
-            background: var(--card-bg); border-radius: var(--radius);
-            padding: 40px; max-width: 700px; margin: 0 auto;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(0,0,0,0.04);
+            background: var(--card); border-radius: var(--radius);
+            padding: 44px; max-width: 680px; margin: 0 auto;
+            box-shadow: var(--shadow); border: 1px solid var(--card-border);
+            transition: background var(--transition), box-shadow var(--transition);
         }
-        .about-card p {
-            color: var(--text-light); font-size: 1rem; line-height: 1.9;
-        }
-        .tags {
-            display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px;
-        }
+        .about-card p { color: var(--text-secondary); font-size: 0.98rem; line-height: 1.9; }
+        .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
         .tag {
             background: linear-gradient(135deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.08) 100%);
-            color: #667eea;
-            padding: 6px 18px; border-radius: 100px;
-            font-size: 0.85rem; font-weight: 500;
+            color: var(--primary); padding: 5px 16px; border-radius: 100px;
+            font-size: 0.83rem; font-weight: 500;
+            transition: all 0.2s;
         }
+        .tag:hover { transform: translateY(-1px); }
 
         /* ============================================================
            AI 工具箱
         ============================================================ */
         .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 28px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px;
         }
         .tool-card {
-            background: var(--card-bg); border-radius: var(--radius);
+            background: var(--card); border-radius: var(--radius);
             padding: 36px 30px;
             box-shadow: var(--shadow);
-            transition: all 0.35s ease;
+            transition: all var(--transition);
             text-decoration: none; color: inherit;
-            display: block;
-            border: 1px solid rgba(0,0,0,0.04);
-            position: relative; overflow: hidden;
+            display: block; position: relative; overflow: hidden;
+            border: 1px solid var(--card-border);
         }
         .tool-card::before {
             content: '';
             position: absolute; top: 0; left: 0; right: 0; height: 4px;
             background: var(--gradient);
             transform: scaleX(0); transform-origin: center;
-            transition: transform 0.35s ease;
+            transition: transform 0.4s ease;
         }
-        .tool-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-4px); }
+        .tool-card:hover {
+            box-shadow: var(--shadow-lg); transform: translateY(-6px);
+        }
         .tool-card:hover::before { transform: scaleX(1); }
-        .tool-card .icon { font-size: 2.6rem; margin-bottom: 18px; display: block; }
-        .tool-card h3 { font-size: 1.25rem; margin-bottom: 6px; }
-        .tool-card .desc { color: var(--text-light); font-size: 0.9rem; margin-bottom: 14px; }
-        .tool-card .features {
-            list-style: none;
-            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;
+        .tool-card .t-icon {
+            font-size: 2.5rem; display: inline-block;
+            transition: transform 0.3s;
         }
-        .tool-card .features li {
-            background: var(--bg); padding: 4px 14px; border-radius: 100px;
-            font-size: 0.8rem; color: var(--text-light);
+        .tool-card:hover .t-icon { transform: translateY(-4px); }
+        .tool-card h3 { font-size: 1.22rem; margin: 14px 0 6px; }
+        .tool-card .desc { color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 12px; }
+        .tool-card .feats {
+            list-style: none; display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 20px;
         }
+        .tool-card .feats li {
+            font-size: 0.82rem; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 5px;
+        }
+        .tool-card .feats li::before { content: '✓'; color: #22c55e; font-weight: 700; font-size: 0.75rem; }
         .tool-card .try-btn {
             display: inline-block;
             background: var(--gradient); color: #fff;
-            padding: 9px 24px; border-radius: 100px;
-            font-size: 0.88rem; font-weight: 600;
-            transition: transform 0.3s;
+            padding: 8px 22px; border-radius: 100px;
+            font-size: 0.85rem; font-weight: 600;
+            transition: all var(--transition);
         }
-        .tool-card:hover .try-btn { transform: scale(1.05); }
+        .tool-card:hover .try-btn {
+            transform: scale(1.06);
+            box-shadow: 0 4px 16px rgba(102,126,234,0.3);
+        }
 
         /* ============================================================
-           联系方式
+           联系
         ============================================================ */
         .contact-grid {
-            display: flex; justify-content: center; gap: 28px; flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
         }
         .contact-item {
             display: flex; align-items: center; gap: 12px;
-            background: var(--card-bg); padding: 18px 28px;
+            background: var(--card); padding: 16px 26px;
             border-radius: 12px; text-decoration: none; color: var(--text);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-            border: 1px solid rgba(0,0,0,0.04);
-            transition: all 0.3s;
-            font-weight: 500;
+            box-shadow: var(--shadow-sm); border: 1px solid var(--card-border);
+            transition: all var(--transition); font-weight: 500;
         }
         .contact-item:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-            color: #667eea;
+            box-shadow: var(--shadow); color: var(--primary);
         }
-        .contact-item .c-icon { font-size: 1.4rem; }
-
-        /* ============================================================
-           页脚
-        ============================================================ */
-        .footer {
-            text-align: center; padding: 48px 24px;
-            color: var(--text-light); font-size: 0.85rem;
-        }
-        .footer .divider {
-            width: 48px; height: 3px;
-            background: var(--gradient);
-            margin: 0 auto 24px; border-radius: 2px;
-        }
+        .contact-item .c-icon { font-size: 1.3rem; display: flex; }
+        .contact-item .c-icon svg { width: 22px; height: 22px; }
 
         /* ============================================================
            赞赏
         ============================================================ */
         .donate-card {
             max-width: 460px; margin: 0 auto;
-            background: var(--card-bg); border-radius: var(--radius);
+            background: var(--card); border-radius: var(--radius);
             padding: 36px 32px; text-align: center;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: var(--shadow); border: 1px solid var(--card-border);
         }
         .donate-card .d-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-        .donate-card .d-desc { color: var(--text-light); font-size: 0.9rem; margin-bottom: 24px; }
-        .donate-qr {
-            display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+        .donate-card .d-desc { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px; }
+        .donate-qr { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+        .qr-item {
+            background: var(--bg-secondary); border-radius: 14px; padding: 18px 20px;
+            transition: transform 0.3s;
         }
-        .donate-qr .qr-item {
-            background: var(--bg); border-radius: 12px; padding: 16px;
-            width: 170px;
+        .qr-item:hover { transform: translateY(-3px); }
+        .qr-item img {
+            width: 120px; height: 120px; border-radius: 8px; display: block; margin: 0 auto 10px;
         }
-        .qr-item .qr-placeholder {
-            width: 120px; height: 120px;
-            margin: 0 auto 10px;
-            background: #fff; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            border: 2px dashed #e2e8f0;
-            color: #cbd5e0; font-size: 0.75rem;
+        .qr-label { font-size: 0.85rem; font-weight: 600; }
+
+        /* ============================================================
+           页脚
+        ============================================================ */
+        .footer {
+            text-align: center; padding: 48px 24px 40px;
+            color: var(--text-muted); font-size: 0.82rem;
         }
-        .qr-item .qr-label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        .footer .divider {
+            width: 48px; height: 3px;
+            background: var(--gradient);
+            margin: 0 auto 20px; border-radius: 2px;
+        }
+        .footer p { margin: 6px 0; }
+        .footer .visitor { display: inline-flex; gap: 16px; margin-top: 8px; }
 
         /* ============================================================
            响应式
         ============================================================ */
         @media (max-width: 768px) {
-            .hero { padding: 120px 20px 60px; }
+            .hero-blob { width: 300px; height: 300px; }
+            .hero-blob.blob-2 { width: 250px; height: 250px; }
             .hero h1 { font-size: 1.8rem; }
+            .hero { min-height: auto; padding: 110px 20px 60px; }
+            .nav-links { gap: 16px; }
+            .nav-links a { font-size: 0.82rem; }
             .tools-grid { grid-template-columns: 1fr; }
-            .navbar .nav-links { gap: 18px; }
             .section { padding: 56px 20px; }
-            .section-header h2 { font-size: 1.5rem; }
-            .about-card { padding: 28px 24px; }
+            .section-header h2 { font-size: 1.45rem; }
+            .about-card { padding: 28px 22px; }
             .contact-grid { flex-direction: column; align-items: center; }
         }
 
         /* ============================================================
-           滚动动画
+           动画
         ============================================================ */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(36px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .fade-in {
             opacity: 0; transform: translateY(30px);
             transition: opacity 0.7s ease, transform 0.7s ease;
@@ -283,45 +376,60 @@
 <body>
 
     <!-- 导航栏 -->
-    <nav class="navbar">
-        <div class="logo">shibazichuan</div>
-        <ul class="nav-links">
-            <li><a href="#about">关于</a></li>
-            <li><a href="#tools">AI工具</a></li>
-            <li><a href="#contact">联系</a></li>
-            <li><a href="#donate">☕ 赞赏</a></li>
-        </ul>
+    <nav class="navbar" id="navbar">
+        <div class="nav-left">
+            <span class="logo">shibazichuan</span>
+        </div>
+        <div class="nav-right">
+            <ul class="nav-links">
+                <li><a href="#about">关于</a></li>
+                <li><a href="#tools">AI工具</a></li>
+                <li><a href="#contact">联系</a></li>
+                <li><a href="#donate">☕ 赞赏</a></li>
+            </ul>
+            <button class="theme-toggle" id="themeToggle" aria-label="切换暗色模式" title="切换暗色模式">
+                🌙
+            </button>
+        </div>
     </nav>
 
     <!-- Hero -->
     <section class="hero">
-        <div class="avatar">S</div>
-        <h1>shibazichuan</h1>
-        <p class="tagline">
-            👋 你好，欢迎来到我的个人主页。<br>
-            我喜欢捣鼓实用的小工具，希望能帮到你。
-        </p>
-        <div class="cta-group">
-            <a href="#tools" class="btn btn-primary">🛠️ 看看我的工具</a>
-            <a href="https://github.com/shibazichuan" class="btn btn-outline" target="_blank" rel="noopener">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                GitHub
-            </a>
+        <div class="hero-blob blob-1"></div>
+        <div class="hero-blob blob-2"></div>
+        <div class="hero-content">
+            <div class="avatar-wrap">
+                <div class="avatar-glow"></div>
+                <div class="avatar-inner">🛠️</div>
+            </div>
+            <h1>shibazichuan</h1>
+            <p class="hero-sub">捣鼓实用小工具，让 AI 触手可及</p>
+            <p class="hero-desc">
+                DeepSeek 驱动 · 打开即用 · 无需注册 · 完全免费
+            </p>
+            <div class="cta-group">
+                <a href="#tools" class="btn btn-primary">🛠️ 看看我的工具</a>
+                <a href="https://github.com/shibazichuan" class="btn btn-outline" target="_blank" rel="noopener">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </div>
         </div>
     </section>
 
     <!-- 关于我 -->
     <section class="section" id="about">
         <div class="section-header">
-            <h2>👤 关于我</h2>
+            <span class="section-icon">👤</span>
+            <h2>关于我</h2>
             <div class="line"></div>
         </div>
         <div class="about-card fade-in">
             <p>
-                一个喜欢折腾的开发者，相信好工具应该简单直接——<strong>打开就用，不用注册，不用看广告</strong>。
+                一个喜欢折腾的开发者，相信好工具应该简单直接 —— <strong>打开就用，不用注册，不用看广告。</strong>
             </p>
             <p style="margin-top:12px;">
-                业余时间学 AI 和 Python，做了几个实用的小工具放在网上。看到有人真的在用，就是最大的动力 ✨
+                业余时间捣鼓 AI 和 Python，做了几个实用的小工具放网上。看到有人真的在用，就是最大的动力 ✨
             </p>
             <div class="tags">
                 <span class="tag">Python</span>
@@ -337,52 +445,52 @@
     <!-- AI 工具箱 -->
     <section class="section" id="tools">
         <div class="section-header">
-            <h2>🛠️ AI 工具箱</h2>
+            <span class="section-icon">🛠️</span>
+            <h2>AI 工具箱</h2>
+            <p>DeepSeek 驱动 · 完全免费 · 无需注册</p>
             <div class="line"></div>
-            <p style="color:var(--text-light);margin-top:10px;">DeepSeek 驱动 · 完全免费 · 无需注册</p>
         </div>
         <div class="tools-grid">
             <!-- 翻译助手 -->
             <a href="https://huivet62pgekb3negae9nw.streamlit.app/" class="tool-card fade-in" target="_blank" rel="noopener">
-                <span class="icon">🌐</span>
+                <span class="t-icon">🌐</span>
                 <h3>AI 翻译助手</h3>
-                <p class="desc">中文 ↔ 英文双向翻译，地道自然，不是机翻味。</p>
-                <ul class="features">
-                    <li>中 → 英</li>
-                    <li>英 → 中</li>
-                    <li>多行文本</li>
-                    <li>地道表达</li>
+                <p class="desc">中文 ↔ 英文双向翻译，地道自然，告别机翻味。</p>
+                <ul class="feats">
+                    <li>智能互换，一键反向翻译</li>
+                    <li>翻译历史自动保存</li>
+                    <li>一键复制结果</li>
                 </ul>
                 <span class="try-btn">立即试用 →</span>
             </a>
 
             <!-- 小红书 -->
             <a href="https://3hffuxzfc8kwqpjdjtoizx.streamlit.app/" class="tool-card fade-in" target="_blank" rel="noopener">
-                <span class="icon">✨</span>
+                <span class="t-icon">✨</span>
                 <h3>小红书文案生成器</h3>
-                <p class="desc">输入产品信息，AI 帮你写一篇吸睛的种草文案。</p>
-                <ul class="features">
-                    <li>5种风格</li>
-                    <li>3种篇幅</li>
-                    <li>可调创意度</li>
-                    <li>自带话题标签</li>
+                <p class="desc">输入产品信息，AI 一键生成多版本种草文案。</p>
+                <ul class="feats">
+                    <li>一次生成 3 个不同版本</li>
+                    <li>5 种风格 × 3 种篇幅</li>
+                    <li>历史记录 + 一键复制</li>
                 </ul>
                 <span class="try-btn">立即试用 →</span>
             </a>
         </div>
     </section>
 
-    <!-- 联系方式 -->
+    <!-- 联系 -->
     <section class="section" id="contact">
         <div class="section-header">
-            <h2>📬 联系我</h2>
+            <span class="section-icon">📬</span>
+            <h2>联系我</h2>
+            <p>欢迎交流，交个朋友</p>
             <div class="line"></div>
-            <p style="color:var(--text-light);margin-top:10px;">欢迎交流，交个朋友</p>
         </div>
         <div class="contact-grid fade-in">
             <a href="https://github.com/shibazichuan" class="contact-item" target="_blank" rel="noopener">
                 <span class="c-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                 </span>
                 GitHub
             </a>
@@ -396,22 +504,23 @@
     <!-- 赞赏 -->
     <section class="section" id="donate">
         <div class="section-header">
-            <h2>☕ 请作者喝杯咖啡</h2>
+            <span class="section-icon">☕</span>
+            <h2>请作者喝杯咖啡</h2>
+            <p>如果我的工具帮到了你，欢迎赞赏支持</p>
             <div class="line"></div>
-            <p style="color:var(--text-light);margin-top:10px;">如果我的工具帮到了你，欢迎赞赏支持</p>
         </div>
         <div class="donate-card fade-in">
             <div class="donate-qr">
                 <div class="qr-item">
-                    <img src="wx-qr.jpg" alt="微信赞赏码" style="width:120px;height:120px;border-radius:8px;display:block;margin:0 auto 10px;">
+                    <img src="wx-qr.jpg" alt="微信赞赏码" loading="lazy">
                     <div class="qr-label">💚 微信赞赏</div>
                 </div>
                 <div class="qr-item">
-                    <img src="alipay-qr.jpg" alt="支付宝赞赏码" style="width:120px;height:120px;border-radius:8px;display:block;margin:0 auto 10px;">
+                    <img src="alipay-qr.jpg" alt="支付宝赞赏码" loading="lazy">
                     <div class="qr-label">💙 支付宝赞赏</div>
                 </div>
             </div>
-            <p style="margin-top:18px;font-size:0.82rem;color:#a0aec0;">打开微信/支付宝 → 扫一扫 → 任意金额</p>
+            <p style="margin-top:18px;font-size:0.82rem;color:var(--text-muted);">打开微信/支付宝 → 扫一扫 → 任意金额</p>
         </div>
     </section>
 
@@ -419,22 +528,72 @@
     <footer class="footer">
         <div class="divider"></div>
         <p>shibazichuan · DeepSeek 驱动 · 完全免费 · 无需注册</p>
-        <p style="margin-top:12px;font-size:0.8rem;color:#a0aec0;">
-            © 2025 shibazichuan
-        </p>
+        <div class="visitor">
+            <span>👀 总访问 <span id="busuanzi_value_site_uv">-</span> 次</span>
+            <span>📄 总浏览 <span id="busuanzi_value_site_pv">-</span> 次</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-muted);">© 2025 shibazichuan</p>
     </footer>
 
-    <!-- 滚动动画 -->
     <script>
+        // ============================================================
+        // 暗色模式
+        // ============================================================
+        (function() {
+            const html = document.documentElement;
+            const toggle = document.getElementById('themeToggle');
+            const saved = localStorage.getItem('theme');
+
+            // 初始主题：用户保存的 > 系统偏好 > light
+            if (saved) {
+                html.setAttribute('data-theme', saved);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                html.setAttribute('data-theme', 'dark');
+            }
+
+            function updateIcon() {
+                toggle.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+            }
+            updateIcon();
+
+            toggle.addEventListener('click', () => {
+                const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+                updateIcon();
+            });
+        })();
+
+        // ============================================================
+        // 滚动时导航栏阴影
+        // ============================================================
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 10);
+        });
+
+        // ============================================================
+        // 滚动入场动画
+        // ============================================================
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
                 }
             });
-        }, { threshold: 0.15 });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // ============================================================
+        // 不蒜子 - 访客统计
+        // ============================================================
+        (function() {
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
+            document.body.appendChild(s);
+        })();
     </script>
 
 </body>
