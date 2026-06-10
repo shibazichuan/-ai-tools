@@ -7,8 +7,21 @@ AI 小红书文案生成器 — DeepSeek 版
 
 import streamlit as st
 from openai import OpenAI
+import random
 
 API_KEY = st.secrets["DEEPSEEK_API_KEY"]
+
+# 有趣的 loading 文案
+LOADING_MSGS = [
+    "🤔 AI 正在构思创意...",
+    "✍️ 正在奋笔疾书...",
+    "✨ 灵感迸发中...",
+    "🎨 精心排版中...",
+    "💡 提炼卖点中...",
+    "🔥 文案即将出炉...",
+    "📝 打磨每一个字...",
+    "🌟 注入种草魔法...",
+]
 
 # 页面设置
 st.set_page_config(
@@ -30,6 +43,12 @@ st.title("✨ AI 小红书文案生成器")
 st.caption("输入你的产品，AI 帮你写一篇种草文案。DeepSeek 驱动，完全免费。")
 
 # ============================================================
+# 初始化 session state
+# ============================================================
+if "xhs_history" not in st.session_state:
+    st.session_state.xhs_history = []
+
+# ============================================================
 # 侧边栏 — 风格设置
 # ============================================================
 with st.sidebar:
@@ -41,6 +60,14 @@ with st.sidebar:
     )
 
     st.divider()
+
+    gen_count = st.radio(
+        "生成数量",
+        [1, 3],
+        horizontal=True,
+        index=1,
+        help="一次生成 1 个或 3 个不同角度的版本，默认 3 个",
+    )
 
     with st.expander("高级设置"):
         temperature = st.slider(
@@ -84,11 +111,12 @@ with col1:
         placeholder="比如：学生党、上班族、宝妈...",
     )
 
-    generate_btn = st.button("🚀 生成文案", type="primary", use_container_width=True)
+    generate_btn = st.button(
+        "🚀 生成文案", type="primary", use_container_width=True
+    )
 
 with col2:
     st.subheader("✨ 生成的文案")
-    result_placeholder = st.empty()
 
 # ============================================================
 # 生成逻辑
@@ -119,37 +147,121 @@ if generate_btn:
 6. 如果是种草风格，要说清楚为什么值得买
 7. 适当使用网络热词和口语化表达"""
 
-        with st.spinner("AI 正在创作中..."):
+        if gen_count == 3:
+            prompt += """
+
+请生成 3 个不同角度的版本，用 "---VERSION---" 作为分隔符。
+3 个版本要求：
+- 版本一：主打实用体验，侧重真实使用感受
+- 版本二：主打性价比/优惠，侧重购买理由
+- 版本三：主打情感共鸣/生活方式，侧重场景化描述
+确保 3 个版本有明显差异，各有特色，不要雷同。"""
+
+        with st.spinner(random.choice(LOADING_MSGS)):
             try:
                 client = OpenAI(
                     api_key=API_KEY,
                     base_url="https://api.deepseek.com",
                 )
 
+                max_tokens = 4096 if gen_count == 3 else 2048
+
                 response = client.chat.completions.create(
                     model="deepseek-chat",
                     messages=[
                         {
                             "role": "system",
-                            "content": "你是一个资深的小红书内容创作者，擅长写各种风格的种草文案。你的文案接地气、有感染力、转化率高。",
+                            "content": (
+                                "你是一个资深的小红书内容创作者，擅长写各种风格的种草文案。"
+                                "你的文案接地气、有感染力、转化率高。"
+                            ),
                         },
                         {"role": "user", "content": prompt},
                     ],
                     temperature=temperature,
-                    max_tokens=2048,
+                    max_tokens=max_tokens,
                 )
 
                 result = response.choices[0].message.content
+                tokens = response.usage.total_tokens if response.usage else 0
+
+                # 存入历史
+                st.session_state.xhs_history.insert(
+                    0,
+                    {
+                        "product": product_name,
+                        "style": style,
+                        "result": result,
+                        "gen_count": gen_count,
+                        "tokens": tokens,
+                    },
+                )
+                st.session_state.xhs_history = (
+                    st.session_state.xhs_history[:5]
+                )
 
                 with col2:
-                    st.success("✅ 生成完成！")
-                    st.markdown(result)
+                    st.success(f"✅ 生成完成！消耗 {tokens} tokens")
 
-                    if response.usage:
-                        st.caption(f"消耗约 {response.usage.total_tokens} tokens")
+                    if gen_count == 3:
+                        # 按分隔符拆分版本
+                        versions = [
+                            v.strip()
+                            for v in result.split("---VERSION---")
+                            if v.strip()
+                        ]
+
+                        if len(versions) == 3:
+                            tabs = st.tabs(
+                                ["🔢 版本一", "🔢 版本二", "🔢 版本三"]
+                            )
+                            for tab, version in zip(tabs, versions):
+                                with tab:
+                                    st.markdown(version)
+                                    with st.expander("📋 复制此版本"):
+                                        st.code(version, language=None)
+                        else:
+                            # 解析失败，显示完整结果
+                            st.warning(
+                                f"版本拆分略有偏差（识别到 {len(versions)} 段），"
+                                "显示完整结果："
+                            )
+                            st.markdown(result)
+                            with st.expander("📋 复制文案"):
+                                st.code(result, language=None)
+                    else:
+                        st.markdown(result)
+                        with st.expander("📋 复制文案"):
+                            st.code(result, language=None)
 
             except Exception as e:
                 st.error(f"生成失败：{str(e)}")
 
+# ============================================================
+# 历史记录
+# ============================================================
+if st.session_state.xhs_history:
+    st.divider()
+    with st.expander(
+        f"📜 历史记录（最近 {len(st.session_state.xhs_history)} 条）"
+    ):
+        for i, entry in enumerate(st.session_state.xhs_history):
+            ver_label = (
+                "3版本" if entry["gen_count"] == 3 else "单版本"
+            )
+            st.caption(
+                f"#{i+1}  [{entry['style']}] {entry['product']}"
+                f" · {entry['tokens']} tokens · {ver_label}"
+            )
+            preview = (
+                entry["result"][:100]
+                + ("..." if len(entry["result"]) > 100 else "")
+            )
+            st.text(preview)
+            if i < len(st.session_state.xhs_history) - 1:
+                st.divider()
+
 st.divider()
-st.caption("🚀 完全免费 · 直接使用 · 无需注册 · AI 种草文案生成器 · 小红书写文助手")
+st.caption(
+    "🚀 完全免费 · 直接使用 · 无需注册 · AI 种草文案生成器 · 小红书写文助手"
+)
