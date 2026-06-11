@@ -40,6 +40,13 @@ st.set_page_config(
     layout="wide",
 )
 
+# ============================================================
+# 次数限制 — 必须在所有业务逻辑之前
+# ============================================================
+from st_usage_limiter import init_tool
+
+limiter = init_tool("xhs_writer", free_limit=5)
+
 # SEO 元标签
 st.markdown(
     """
@@ -50,7 +57,28 @@ st.markdown(
 )
 
 st.title("✨ AI 小红书文案生成器")
-st.caption("输入你的产品，AI 帮你写一篇种草文案。DeepSeek 驱动，完全免费。")
+st.caption("输入你的产品，AI 帮你写一篇种草文案。DeepSeek 驱动，每日免费5次。")
+
+# 剩余次数指示器
+_rem = limiter.remaining()
+_rem_color = "#ef4444" if _rem <= 1 else "#667eea"
+_rem_bg = "#fef2f2" if _rem <= 1 else "#f0f4ff"
+st.markdown(f"""
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;
+            padding:5px 14px;border-radius:20px;background:{_rem_bg};
+            font-size:0.82rem;width:fit-content">
+    <span style="display:inline-flex;align-items:center;justify-content:center;
+                 min-width:20px;height:20px;border-radius:50%;font-weight:700;font-size:0.72rem;
+                 background:{_rem_color};color:#fff;padding:0 6px;
+                 {'animation: pulse 0.6s infinite alternate;' if _rem <= 1 else ''}">
+        {_rem if _rem != float('inf') else '∞'}
+    </span>
+    次剩余 · 每日免费 {limiter.free_limit} 次 · 用完可升级会员
+</div>
+<style>
+@keyframes pulse {{ from {{ transform: scale(1); }} to {{ transform: scale(1.12); }} }}
+</style>
+""", unsafe_allow_html=True)
 
 # 品牌标签
 col_t1, col_t2, col_t3, col_t4 = st.columns([0.7, 0.7, 1, 4])
@@ -193,6 +221,8 @@ with col2:
 if generate_btn:
     if not product_name:
         st.error("请至少输入产品名称")
+    elif not limiter.check_and_consume():
+        st.stop()  # 超出限制
     else:
         length_map = {
             "短文案（~200字）": "200字左右",

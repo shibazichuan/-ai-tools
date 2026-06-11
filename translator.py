@@ -41,6 +41,13 @@ st.set_page_config(
     layout="centered",
 )
 
+# ============================================================
+# 次数限制 — 必须在所有业务逻辑之前
+# ============================================================
+from st_usage_limiter import init_tool
+
+limiter = init_tool("translator", free_limit=5)
+
 # SEO 元标签
 st.markdown(
     """
@@ -51,7 +58,28 @@ st.markdown(
 )
 
 st.title("🌐 AI 翻译助手")
-st.caption("中文 ↔ 英文翻译 · 直接使用，完全免费")
+st.caption("中文 ↔ 英文翻译 · 每日免费5次")
+
+# 剩余次数指示器（仅显示，不阻止渲染 — check_and_consume 在翻译按钮点击时调用）
+_rem = limiter.remaining()
+_rem_color = "#ef4444" if _rem <= 1 else "#667eea"
+_rem_bg = "#fef2f2" if _rem <= 1 else "#f0f4ff"
+st.markdown(f"""
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;
+            padding:5px 14px;border-radius:20px;background:{_rem_bg};
+            font-size:0.82rem;width:fit-content">
+    <span style="display:inline-flex;align-items:center;justify-content:center;
+                 min-width:20px;height:20px;border-radius:50%;font-weight:700;font-size:0.72rem;
+                 background:{_rem_color};color:#fff;padding:0 6px;
+                 {'animation: pulse 0.6s infinite alternate;' if _rem <= 1 else ''}">
+        {_rem if _rem != float('inf') else '∞'}
+    </span>
+    次剩余 · 每日免费 {limiter.free_limit} 次 · 用完可升级会员
+</div>
+<style>
+@keyframes pulse {{ from {{ transform: scale(1); }} to {{ transform: scale(1.12); }} }}
+</style>
+""", unsafe_allow_html=True)
 
 # 品牌标签
 col_t1, col_t2, col_t3, col_t4 = st.columns([0.7, 0.7, 1, 4])
@@ -167,6 +195,8 @@ if swap_btn and st.session_state.last_translation:
 if translate_btn:
     if not text.strip():
         st.error("❌ 请输入要翻译的文本")
+    elif not limiter.check_and_consume():
+        st.stop()  # 超出限制，弹窗已自动显示
     else:
         with st.spinner(random.choice(LOADING_MSGS)):
             try:
