@@ -30,6 +30,7 @@ import base64
 import hashlib
 import streamlit as st
 from datetime import datetime, timezone, timedelta
+from supabase_client import verify_member, log_usage, SUPABASE_ENABLED
 
 # ============================================================
 # 配置
@@ -96,6 +97,7 @@ class UsageLimiter:
         self._skey_date = f"zm_{tool_id}_date"
         self._skey_lock = f"zm_{tool_id}_lock"
         self._skey_loaded = f"zm_{tool_id}_loaded"
+        self._skey_member = f"zm_{tool_id}_member"
         self._today = datetime.now(TZ_UTC8).strftime("%Y-%m-%d")
 
     # ==========================================================
@@ -155,10 +157,27 @@ class UsageLimiter:
                 count = lsC;
             }}
 
+            // ===== 设备指纹 =====
+            function getFingerprint() {{
+                try {{
+                    var c = document.createElement('canvas');
+                    var ctx = c.getContext('2d');
+                    ctx.textBaseline = 'top';
+                    ctx.font = '14px Arial';
+                    ctx.fillText('zm_fp_' + KEY, 2, 2);
+                    var hash = c.toDataURL().slice(-32);
+                    return hash + '|' + screen.width + 'x' + screen.height
+                         + '|' + (navigator.language || '')
+                         + '|' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+                }} catch(e) {{ return 'fallback_' + KEY; }}
+            }}
+
+            var fp = getFingerprint();
+
             var cur = new URL(window.location);
             if (!cur.searchParams.get('zm_data')) {{
                 cur.searchParams.set('zm_data', JSON.stringify({{
-                    date: td, count: count, suspicious: suspicious, key: KEY
+                    date: td, count: count, suspicious: suspicious, key: KEY, fp: fp
                 }}));
                 window.history.replaceState({{}}, '', cur.toString());
             }}
@@ -196,9 +215,48 @@ class UsageLimiter:
         return 0
 
     # ==========================================================
-    # 会员检查
+    # 设备指纹
     # ==========================================================
+    def get_fingerprint(self) -> str:
+        """从 URL params 读取 JS 生成的设备指纹"""
+        zm_data = st.query_params.get("zm_data", "")
+        if zm_data:
+            try:
+                parsed = json.loads(zm_data)
+                fp = parsed.get("fp", "")
+                if fp:
+                    return fp
+            except Exception:
+                pass
+        return ""
+
+    # ==========================================================
+    # 会员检查（Supabase 优先 → session_state 缓存）
+    # ==========================================================
+    _member_cache = {}  # 类级别缓存：{fingerprint: bool}
+
     def is_member(self):
+        # L0: session_state 缓存（当前会话内）
+        if self._skey_member in st.session_state:
+            return st.session_state[self._skey_member]
+
+        # L1: Supabase 验证（需要配置 + 指纹）
+        if SUPABASE_ENABLED:
+            fp = self.get_fingerprint()
+            if fp:
+                # 检查类级别缓存
+                if fp in self._member_cache:
+                    result = self._member_cache[fp]
+                else:
+                    result = verify_member(fp)
+                    self._member_cache[fp] = result
+
+                if result:
+                    st.session_state[self._skey_member] = True
+                    return True
+
+        # L2: 本地降级
+        st.session_state[self._skey_member] = False
         return False
 
     # ==========================================================
@@ -237,6 +295,7 @@ class UsageLimiter:
 
         if used >= self.free_limit:
             self._show_limit_ui(used)
+            log_usage(self.get_fingerprint(), self.tool_id, False, limit_hit=True)
             return False
 
         # 消耗
@@ -246,6 +305,9 @@ class UsageLimiter:
         st.session_state[self._skey_lock] = True
 
         self._sync_storage(used)
+
+        # Supabase 使用日志（异步，不阻塞）
+        log_usage(self.get_fingerprint(), self.tool_id, False, limit_hit=False)
 
         if used == DONATE_TRIGGER_AT:
             self._show_donate_toast()
@@ -282,9 +344,30 @@ class UsageLimiter:
     # ==========================================================
     def show_indicator(self):
         """显示剩余次数指示器（页面加载时调用）"""
-        self._show_indicator(self.used())
+        if self.is_member():
+            self._show_pro_badge()
+        else:
+            self._show_indicator(self.used())
+
+    def _show_pro_badge(self):
+        st.markdown("""
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;
+                    padding:5px 14px;border-radius:20px;
+                    background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));
+                    font-size:0.85rem;width:fit-content;border:1px solid rgba(102,126,234,0.2)">
+            <span style="display:inline-flex;align-items:center;justify-content:center;
+                         padding:0 8px;height:22px;border-radius:50%;font-weight:700;font-size:0.68rem;
+                         background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff">
+                PRO
+            </span>
+            会员无限使用
+        </div>
+        """, unsafe_allow_html=True)
 
     def _show_indicator(self, used):
+        if self.is_member():
+            self._show_pro_badge()
+            return
         rem = self.free_limit - used
         color = "#ef4444" if rem <= 1 else "#667eea"
         bg = "#fef2f2" if rem <= 1 else "#f0f4ff"
@@ -309,6 +392,8 @@ class UsageLimiter:
     # 超出限制弹窗（暗色模式适配）
     # ==========================================================
     def _show_limit_ui(self, used):
+        fp = self.get_fingerprint()
+        fp_display = fp[:16] + "..." if len(fp) > 16 else fp
         st.markdown(f"""
         <div class="zm-overlay">
             <div class="zm-card">
@@ -319,11 +404,19 @@ class UsageLimiter:
                     每天免费 <strong>{self.free_limit}</strong> 次<br>
                     今日已使用 <strong>{used}</strong> 次
                 </p>
+                <div class="zm-fingerprint">
+                    <span style="font-size:0.72rem;color:#94a3b8">你的设备 ID</span>
+                    <code style="display:block;margin-top:2px;padding:4px 8px;background:#f1f5f9;
+                                 border-radius:6px;font-size:0.68rem;word-break:break-all;
+                                 color:#64748b;max-width:100%;overflow:hidden">
+                        {fp_display}
+                    </code>
+                </div>
                 <div class="zm-actions">
                     <a href="{MEMBER_URL}" target="_blank" rel="noopener" class="zm-btn-upgrade">
                         ⚡ 升级会员 · 无限使用
                     </a>
-                    <span class="zm-sub">💚 月付仅 ¥19.9 · 支持开发者</span>
+                    <span class="zm-sub">💚 月付仅 ¥19.9 · 开通时请提供上方设备 ID</span>
                 </div>
             </div>
         </div>
@@ -362,6 +455,9 @@ class UsageLimiter:
             .zm-desc {{ color:#94a3b8; }}
             .zm-desc strong {{ color:#818cf8; }}
             .zm-sub {{ color:#64748b; }}
+            .zm-fingerprint code {{
+                background:#2d2d3f !important;color:#94a3b8 !important;
+            }}
         }}
 
         /* ===== 动画 ===== */
@@ -382,30 +478,46 @@ class UsageLimiter:
     # ==========================================================
     def render_stats(self):
         """在侧边栏渲染使用统计"""
-        used = self.used()
-        rem = self.remaining()
-        pct = min(100, int(used / self.free_limit * 100)) if self.free_limit > 0 else 0
-        bar_color = "#ef4444" if rem == 0 else ("#f59e0b" if rem <= 1 else "#667eea")
-
         st.markdown("---")
         st.markdown("#### 📊 使用统计")
-        st.markdown(f"""
-        <div style="font-size:0.85rem;line-height:1.8">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span>今日已用</span><strong>{used}/{self.free_limit}</strong>
+
+        if self.is_member():
+            st.markdown("""
+            <div style="font-size:0.85rem;line-height:1.8">
+                <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;
+                            padding:3px 12px;border-radius:100px;
+                            background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.15));
+                            border:1px solid rgba(245,158,11,0.3)">
+                    <span style="display:inline-flex;align-items:center;justify-content:center;
+                                 padding:0 8px;height:18px;border-radius:50%;font-weight:700;font-size:0.65rem;
+                                 background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff">PRO</span>
+                    <strong style="color:#f59e0b">会员无限使用</strong>
+                </div>
             </div>
-            <div style="background:#e5e7eb;border-radius:100px;height:6px;overflow:hidden;margin-bottom:8px">
-                <div style="width:{pct}%;height:100%;border-radius:100px;
-                            background:{bar_color};transition:width 0.3s"></div>
+            """, unsafe_allow_html=True)
+        else:
+            used = self.used()
+            rem = self.remaining()
+            pct = min(100, int(used / self.free_limit * 100)) if self.free_limit > 0 else 0
+            bar_color = "#ef4444" if rem == 0 else ("#f59e0b" if rem <= 1 else "#667eea")
+
+            st.markdown(f"""
+            <div style="font-size:0.85rem;line-height:1.8">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                    <span>今日已用</span><strong>{used}/{self.free_limit}</strong>
+                </div>
+                <div style="background:#e5e7eb;border-radius:100px;height:6px;overflow:hidden;margin-bottom:8px">
+                    <div style="width:{pct}%;height:100%;border-radius:100px;
+                                background:{bar_color};transition:width 0.3s"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#94a3b8">
+                    <span>{'🚫 已用完' if rem == 0 else f'剩余 {rem} 次'}</span>
+                    <span>次日0点重置</span>
+                </div>
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#94a3b8">
-                <span>{'🚫 已用完' if rem == 0 else f'剩余 {rem} 次'}</span>
-                <span>次日0点重置</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        if rem <= 1 and rem != 0:
-            st.caption("💡 快到上限了，升级会员解锁无限使用 →")
+            """, unsafe_allow_html=True)
+            if rem <= 1 and rem != 0:
+                st.caption("💡 快到上限了，升级会员解锁无限使用 →")
 
     # ==========================================================
     # Toast 提示

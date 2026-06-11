@@ -352,6 +352,15 @@
         .pricing-note {
             margin-top: 12px; font-size: 0.75rem; color: var(--text-muted);
         }
+        .pricing-steps {
+            text-align: left; margin-bottom: 20px;
+            padding: 16px; border-radius: 12px;
+            background: var(--bg-secondary);
+            font-size: 0.8rem; color: var(--text-secondary); line-height: 1.7;
+        }
+        .pricing-step-title { font-weight: 700; margin-bottom: 6px; color: var(--text); }
+        .pricing-steps ol { padding-left: 18px; margin: 0; }
+        .pricing-steps ol li { padding: 3px 0; border-bottom: none; }
 
         @media (max-width: 640px) {
             .pricing-grid { grid-template-columns: 1fr; }
@@ -582,8 +591,17 @@
                     <li>抢先体验新工具</li>
                     <li>优先客服支持</li>
                 </ul>
-                <a href="#donate" class="pricing-btn">🚀 即刻升级（赞赏开通）</a>
-                <p class="pricing-note">暂通过赞赏手动开通，自动支付即将上线</p>
+                <div class="pricing-steps">
+                    <p class="pricing-step-title">📋 开通步骤</p>
+                    <ol>
+                        <li>在工具里用完免费次数，弹窗会显示你的 <strong>设备 ID</strong></li>
+                        <li>扫描下方赞赏码支付 <strong>¥19.9</strong></li>
+                        <li>将 <strong>设备 ID + 支付截图</strong> 发送给站长</li>
+                        <li>24小时内开通，刷新工具即生效</li>
+                    </ol>
+                </div>
+                <a href="#donate" class="pricing-btn">💳 赞赏支付</a>
+                <p class="pricing-note">客服微信：发送设备 ID 至 shibazichuan</p>
             </div>
         </div>
     </section>
