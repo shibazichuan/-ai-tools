@@ -344,10 +344,13 @@ class UsageLimiter:
     # ==========================================================
     def show_indicator(self):
         """显示剩余次数指示器（页面加载时调用）"""
-        if self.is_member():
-            self._show_pro_badge()
-        else:
-            self._show_indicator(self.used())
+        try:
+            if self.is_member():
+                self._show_pro_badge()
+            else:
+                self._show_indicator(self.used())
+        except Exception as e:
+            st.error(f"show_indicator 错误: {type(e).__name__}: {e}")
 
     def _show_pro_badge(self):
         st.markdown("""

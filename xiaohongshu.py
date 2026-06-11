@@ -52,7 +52,11 @@ st.markdown(
 st.title("✨ AI 小红书文案生成器")
 st.caption("输入你的产品，AI 帮你写一篇种草文案。DeepSeek 驱动，每日免费5次。")
 
-limiter.show_indicator()
+try:
+    limiter.show_indicator()
+except Exception as e:
+    st.error(f"指示器加载失败: {type(e).__name__}: {e}")
+    st.warning("免费模式 · 每日 5 次")
 
 # 品牌标签
 render_brand_tags()

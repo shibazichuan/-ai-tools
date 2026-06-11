@@ -54,7 +54,11 @@ st.markdown(
 st.title("🌐 AI 翻译助手")
 st.caption("中文 ↔ 英文翻译 · 每日免费5次")
 
-limiter.show_indicator()
+try:
+    limiter.show_indicator()
+except Exception as e:
+    st.error(f"指示器加载失败: {type(e).__name__}: {e}")
+    st.warning("免费模式 · 每日 5 次")
 
 # 品牌标签
 render_brand_tags()
