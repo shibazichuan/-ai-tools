@@ -278,8 +278,12 @@ class UsageLimiter:
         """, height=0)
 
     # ==========================================================
-    # 剩余次数指示器
+    # 剩余次数指示器（公开方法，供页面加载时调用）
     # ==========================================================
+    def show_indicator(self):
+        """显示剩余次数指示器（页面加载时调用）"""
+        self._show_indicator(self.used())
+
     def _show_indicator(self, used):
         rem = self.free_limit - used
         color = "#ef4444" if rem <= 1 else "#667eea"
