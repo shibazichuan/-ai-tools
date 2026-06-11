@@ -217,7 +217,7 @@ class UsageLimiter:
     # ==========================================================
     # 设备指纹
     # ==========================================================
-    def get_fingerprint(self) -> str:
+    def get_fingerprint(self):
         """从 URL params 读取 JS 生成的设备指纹"""
         zm_data = st.query_params.get("zm_data", "")
         if zm_data:
@@ -233,8 +233,6 @@ class UsageLimiter:
     # ==========================================================
     # 会员检查（Supabase 优先 → session_state 缓存）
     # ==========================================================
-    _member_cache = {}  # 类级别缓存：{fingerprint: bool}
-
     def is_member(self):
         # L0: session_state 缓存（当前会话内）
         if self._skey_member in st.session_state:
@@ -244,16 +242,13 @@ class UsageLimiter:
         if SUPABASE_ENABLED:
             fp = self.get_fingerprint()
             if fp:
-                # 检查类级别缓存
-                if fp in self._member_cache:
-                    result = self._member_cache[fp]
-                else:
+                try:
                     result = verify_member(fp)
-                    self._member_cache[fp] = result
-
-                if result:
-                    st.session_state[self._skey_member] = True
-                    return True
+                    if result:
+                        st.session_state[self._skey_member] = True
+                        return True
+                except Exception:
+                    pass  # Supabase 调用失败 → 降级为免费
 
         # L2: 本地降级
         st.session_state[self._skey_member] = False
