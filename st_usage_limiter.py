@@ -339,6 +339,7 @@ class UsageLimiter:
     # ==========================================================
     def show_indicator(self):
         """显示剩余次数指示器（页面加载时调用）"""
+        self._inject_bridge()  # 确保读取前桥接已注入
         try:
             if self.is_member():
                 self._show_pro_badge()
