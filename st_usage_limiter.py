@@ -302,43 +302,106 @@ class UsageLimiter:
         """, unsafe_allow_html=True)
 
     # ==========================================================
-    # 超出限制弹窗
+    # 超出限制弹窗（暗色模式适配）
     # ==========================================================
     def _show_limit_ui(self, used):
         st.markdown(f"""
-        <div style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
-                    display:flex;align-items:center;justify-content:center;padding:20px">
-            <div style="background:white;border-radius:20px;padding:40px 36px;
-                        max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.15);
-                        animation: slideUp 0.35s ease-out">
-                <div style="font-size:3rem;margin-bottom:12px">🎯</div>
-                <h3 style="margin-bottom:8px;font-weight:700">今日免费次数已用完</h3>
-                <p style="color:#64748b;margin-bottom:24px;line-height:1.8">
-                    <strong style="color:#667eea">{self.config['name']}</strong>
+        <div class="zm-overlay">
+            <div class="zm-card">
+                <div class="zm-icon">🎯</div>
+                <h3>今日免费次数已用完</h3>
+                <p class="zm-desc">
+                    <strong>{self.config['name']}</strong>
                     每天免费 <strong>{self.free_limit}</strong> 次<br>
                     今日已使用 <strong>{used}</strong> 次
                 </p>
-                <div style="display:flex;flex-direction:column;gap:10px">
-                    <a href="{MEMBER_URL}" target="_blank" rel="noopener"
-                       style="display:block;padding:12px 28px;border-radius:100px;
-                              background:linear-gradient(135deg,#667eea,#764ba2);
-                              color:white;text-decoration:none;font-weight:600;
-                              box-shadow:0 4px 16px rgba(102,126,234,0.3)">
+                <div class="zm-actions">
+                    <a href="{MEMBER_URL}" target="_blank" rel="noopener" class="zm-btn-upgrade">
                         ⚡ 升级会员 · 无限使用
                     </a>
-                    <span style="color:#94a3b8;font-size:0.82rem">
-                        💚 月付仅 ¥19.9 · 支持开发者
-                    </span>
+                    <span class="zm-sub">💚 月付仅 ¥19.9 · 支持开发者</span>
                 </div>
             </div>
         </div>
         <style>
-        @keyframes slideUp {{
+        /* ===== 弹窗基础样式 ===== */
+        .zm-overlay {{
+            position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);
+            display:flex;align-items:center;justify-content:center;padding:20px;
+        }}
+        .zm-card {{
+            background:#fff;border-radius:20px;padding:40px 36px;max-width:420px;
+            text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.15);
+            animation: zmSlideUp 0.35s ease-out;
+        }}
+        .zm-card h3 {{ margin-bottom:8px;font-weight:700;color:#1a1a2e; }}
+        .zm-icon {{ font-size:3rem;margin-bottom:12px; }}
+        .zm-desc {{ color:#64748b;margin-bottom:24px;line-height:1.8;font-size:0.95rem; }}
+        .zm-desc strong {{ color:#667eea;font-weight:700; }}
+        .zm-actions {{ display:flex;flex-direction:column;gap:10px; }}
+        .zm-btn-upgrade {{
+            display:block;padding:12px 28px;border-radius:100px;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff;text-decoration:none;font-weight:600;font-size:0.95rem;
+            box-shadow:0 4px 16px rgba(102,126,234,0.3);
+            transition: all 0.25s;
+        }}
+        .zm-btn-upgrade:hover {{ transform:translateY(-2px);box-shadow:0 8px 28px rgba(102,126,234,0.4); }}
+        .zm-sub {{ color:#94a3b8;font-size:0.82rem; }}
+
+        /* ===== 暗色模式 ===== */
+        @media (prefers-color-scheme: dark) {{
+            .zm-card {{
+                background:#1e1e2e;box-shadow:0 20px 60px rgba(0,0,0,0.4);
+            }}
+            .zm-card h3 {{ color:#e2e8f0; }}
+            .zm-desc {{ color:#94a3b8; }}
+            .zm-desc strong {{ color:#818cf8; }}
+            .zm-sub {{ color:#64748b; }}
+        }}
+
+        /* ===== 动画 ===== */
+        @keyframes zmSlideUp {{
             from {{ transform: translateY(24px) scale(0.96); opacity: 0; }}
             to   {{ transform: translateY(0) scale(1); opacity: 1; }}
         }}
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {{
+            .zm-card {{ margin:12px;padding:28px 20px;border-radius:16px; }}
+        }}
         </style>
         """, unsafe_allow_html=True)
+
+    # ==========================================================
+    # 使用统计（供工具侧边栏展示）
+    # ==========================================================
+    def render_stats(self):
+        """在侧边栏渲染使用统计"""
+        used = self.used()
+        rem = self.remaining()
+        pct = min(100, int(used / self.free_limit * 100)) if self.free_limit > 0 else 0
+        bar_color = "#ef4444" if rem == 0 else ("#f59e0b" if rem <= 1 else "#667eea")
+
+        st.markdown("---")
+        st.markdown("#### 📊 使用统计")
+        st.markdown(f"""
+        <div style="font-size:0.85rem;line-height:1.8">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span>今日已用</span><strong>{used}/{self.free_limit}</strong>
+            </div>
+            <div style="background:#e5e7eb;border-radius:100px;height:6px;overflow:hidden;margin-bottom:8px">
+                <div style="width:{pct}%;height:100%;border-radius:100px;
+                            background:{bar_color};transition:width 0.3s"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#94a3b8">
+                <span>{'🚫 已用完' if rem == 0 else f'剩余 {rem} 次'}</span>
+                <span>次日0点重置</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        if rem <= 1 and rem != 0:
+            st.caption("💡 快到上限了，升级会员解锁无限使用 →")
 
     # ==========================================================
     # Toast 提示

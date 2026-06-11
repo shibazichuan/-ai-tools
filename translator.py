@@ -143,6 +143,8 @@ with st.sidebar:
     st.divider()
     st.caption("by shibazichuan\n完全免费 · 无需注册")
 
+    limiter.render_stats()
+
 # ============================================================
 # 初始化 session state
 # ============================================================
