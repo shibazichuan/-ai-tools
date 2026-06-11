@@ -170,8 +170,12 @@ text = st.text_area(
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col1:
+    _no_remaining = limiter.remaining() == 0
     translate_btn = st.button(
-        "🔄 翻译", type="primary", use_container_width=True
+        "🔄 翻译" if not _no_remaining else "🚫 今日次数已用完",
+        type="primary",
+        use_container_width=True,
+        disabled=_no_remaining,
     )
 with col2:
     swap_btn = st.button(

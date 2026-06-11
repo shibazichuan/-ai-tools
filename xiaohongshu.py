@@ -208,8 +208,12 @@ with col1:
         placeholder="比如：学生党、上班族、宝妈...",
     )
 
+    _no_remaining = limiter.remaining() == 0
     generate_btn = st.button(
-        "🚀 生成文案", type="primary", use_container_width=True
+        "🚀 生成文案" if not _no_remaining else "🚫 今日次数已用完",
+        type="primary",
+        use_container_width=True,
+        disabled=_no_remaining,
     )
 
 with col2:
