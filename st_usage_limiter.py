@@ -205,6 +205,7 @@ class UsageLimiter:
     # 剩余 / 已用
     # ==========================================================
     def remaining(self):
+        self._inject_bridge()
         if self.is_member():
             return float('inf')
         return max(0, self.free_limit - self._get_usage())
@@ -318,7 +319,7 @@ class UsageLimiter:
                     今日已使用 <strong>{used}</strong> 次
                 </p>
                 <div style="display:flex;flex-direction:column;gap:10px">
-                    <a href="{MEMBER_URL}" target="_self"
+                    <a href="{MEMBER_URL}" target="_blank" rel="noopener"
                        style="display:block;padding:12px 28px;border-radius:100px;
                               background:linear-gradient(135deg,#667eea,#764ba2);
                               color:white;text-decoration:none;font-weight:600;
